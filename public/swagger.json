@@ -196,6 +196,11 @@
     "/api/deactivate": {
       "delete": {
         "summary": "Deactivate a license for a specific account and server",
+        "security": [
+          {
+            "adminSecret": []
+          }
+        ],
         "parameters": [
           {
             "name": "key",
@@ -235,6 +240,17 @@
                 "schema": {
                   "type": "string",
                   "example": "OK|DEACTIVATED"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid admin secret",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "ERR|AUTH|unauthorized"
                 }
               }
             }

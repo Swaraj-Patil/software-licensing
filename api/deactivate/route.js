@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Methods', 'DELETE,OPTIONS');
   res.setHeader(
     'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
+    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version, x-admin-secret'
   );
 
   // Handle OPTIONS request
@@ -19,6 +19,11 @@ export default async function handler(req, res) {
   // Only allow DELETE
   if (req.method !== 'DELETE') {
     return res.status(405).send("ERR|METHOD|method not allowed");
+  }
+
+  // Check admin authorization
+  if (req.headers["x-admin-secret"] !== process.env.ADMIN_SECRET) {
+    return res.status(401).send("ERR|AUTH|unauthorized");
   }
 
   try {
