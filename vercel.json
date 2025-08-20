@@ -12,8 +12,16 @@
   ],
   "routes": [
     {
+      "src": "/$",
+      "dest": "/docs"
+    },
+    {
       "src": "/docs",
-      "dest": "/docs.html"
+      "dest": "/public/docs.html"
+    },
+    {
+      "src": "/swagger.json",
+      "dest": "/public/swagger.json"
     },
     {
       "src": "/api/(.*)",
