@@ -27,34 +27,33 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { key, account, server } = req.query;
+    const { key } = req.query;
     
-    if (!key || !account || !server) {
-      return res.status(400).send("ERR|BAD_REQUEST|missing params");
+    if (!key) {
+      return res.status(400).send("ERR|BAD_REQUEST|missing license key");
     }
 
-    // Get license details
+    // Get license details and update it
     const { data: license, error: licenseError } = await supabase
       .from("licenses")
-      .select("id")
+      .update({ active: false })
       .eq("license_key", key.toUpperCase())
+      .select()
       .single();
 
     if (licenseError || !license) {
       return res.status(404).send("ERR|NOT_FOUND|license");
     }
 
-    // Delete the activation
+    // Delete all activations for this license
     const { error: deleteError } = await supabase
       .from("activations")
       .delete()
-      .eq("license_id", license.id)
-      .eq("account", account)
-      .eq("server", server);
+      .eq("license_id", license.id);
 
     if (deleteError) {
-      console.error('Deactivation error:', deleteError);
-      return res.status(500).send("ERR|DB|deactivation failed");
+      console.error('Activation deletion error:', deleteError);
+      return res.status(500).send("ERR|DB|activation deletion failed");
     }
 
     res.status(200).send("OK|DEACTIVATED");

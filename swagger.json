@@ -195,7 +195,7 @@
     },
     "/api/deactivate": {
       "delete": {
-        "summary": "Deactivate a license for a specific account and server",
+        "summary": "Deactivate a license entirely (sets active=false and removes all activations)",
         "security": [
           {
             "adminSecret": []
@@ -210,26 +210,6 @@
               "type": "string"
             },
             "description": "License key to deactivate"
-          },
-          {
-            "name": "account",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^\\d+$"
-            },
-            "description": "MetaTrader account number"
-          },
-          {
-            "name": "server",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^[A-Za-z0-9.-]+$"
-            },
-            "description": "MetaTrader server name"
           }
         ],
         "responses": {
