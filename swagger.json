@@ -1,0 +1,257 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Software Licensing API",
+    "version": "1.0.0",
+    "description": "API for managing software licenses and activations"
+  },
+  "servers": [
+    {
+      "url": "https://wtc-licensing.vercel.app",
+      "description": "Production server"
+    },
+    {
+      "url": "http://localhost:3000",
+      "description": "Local development server"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "adminSecret": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "x-admin-secret",
+        "description": "Admin secret key for protected endpoints"
+      }
+    },
+    "schemas": {
+      "License": {
+        "type": "object",
+        "properties": {
+          "license_key": {
+            "type": "string",
+            "example": "1A2B3C4D5E6F7890"
+          },
+          "plan": {
+            "type": "string",
+            "enum": ["pro", "basic", "enterprise"],
+            "example": "pro"
+          },
+          "max_accounts": {
+            "type": "integer",
+            "minimum": 1,
+            "example": 1
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "active": {
+            "type": "boolean",
+            "default": true
+          }
+        }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "error": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/issue": {
+      "post": {
+        "summary": "Create a new license",
+        "security": [
+          {
+            "adminSecret": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "plan": {
+                    "type": "string",
+                    "enum": ["pro", "basic", "enterprise"],
+                    "default": "pro"
+                  },
+                  "max_accounts": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 1
+                  },
+                  "days": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "default": 30
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "License created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/License"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized - Invalid admin secret",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Error"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/validate": {
+      "get": {
+        "summary": "Validate and activate a license",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "License key to validate"
+          },
+          {
+            "name": "account",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+$"
+            },
+            "description": "MetaTrader account number"
+          },
+          {
+            "name": "server",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9.-]+$"
+            },
+            "description": "MetaTrader server name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "License validated successfully",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "OK|pro|2025-12-31T23:59:59Z"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "License validation failed",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "ERR|EXPIRED|license expired"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "License not found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "ERR|NOT_FOUND|license"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/deactivate": {
+      "delete": {
+        "summary": "Deactivate a license for a specific account and server",
+        "parameters": [
+          {
+            "name": "key",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "License key to deactivate"
+          },
+          {
+            "name": "account",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^\\d+$"
+            },
+            "description": "MetaTrader account number"
+          },
+          {
+            "name": "server",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "pattern": "^[A-Za-z0-9.-]+$"
+            },
+            "description": "MetaTrader server name"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "License deactivated successfully",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "OK|DEACTIVATED"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "License not found",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string",
+                  "example": "ERR|NOT_FOUND|license"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
