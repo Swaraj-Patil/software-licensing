@@ -2,7 +2,7 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/**/*.js",
+      "src": "server.js",
       "use": "@vercel/node"
     },
     {
@@ -13,7 +13,10 @@
   "routes": [
     {
       "src": "/$",
-      "dest": "/docs"
+      "status": 308,
+      "headers": {
+        "Location": "/docs"
+      }
     },
     {
       "src": "/docs",
@@ -24,8 +27,16 @@
       "dest": "/public/swagger.json"
     },
     {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
+      "src": "/api/issue",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api/validate",
+      "dest": "/server.js"
+    },
+    {
+      "src": "/api/deactivate",
+      "dest": "/server.js"
     }
   ]
 }
